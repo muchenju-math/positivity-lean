@@ -350,6 +350,46 @@ noncomputable def eliminateSystemInj
       F.fiberMap (φ e).1 ((e.2 ▸ F.fiberMap e.1 x)) := by
   rfl
 
+/-! The auxiliary vertex-deleted system used for the Schur identity has
+one virtual edge for every incoming/outgoing pair.  Both edge labels are
+retained so parallel paths stay distinct. -/
+noncomputable def eliminateSystemAllCompositions
+    {V E : Type*} [Fintype V] [Fintype E]
+    (F : FiniteFiberSystem V E) (u : V)
+    (hloop : ∀ e : E, F.src e ≠ F.tgt e) :
+    FiniteFiberSystem {v : V // v ≠ u}
+      (F.Away u ⊕ (F.Incoming u × F.Outgoing u)) := by
+  classical
+  letI : Fintype (F.Incoming u) := inferInstance
+  letI : Fintype (F.Outgoing u) := inferInstance
+  letI : Fintype (F.Away u) := inferInstance
+  refine
+    { src := fun e => ?_
+      tgt := fun e => ?_
+      Fiber := fun v => F.Fiber v.1
+      fiberFintype := fun v => F.fiberFintype v.1
+      reference := fun v => F.reference v.1
+      fiberMap := fun e => ?_ }
+  · cases e with
+    | inl e => exact ⟨F.src e.1, e.2.1⟩
+    | inr e =>
+        have hsrc : F.src e.1.1 ≠ u := by
+          intro hs
+          exact hloop e.1.1 (hs.trans e.1.2)
+        exact ⟨F.src e.1.1, hsrc⟩
+  · cases e with
+    | inl e => exact ⟨F.tgt e.1, e.2.2⟩
+    | inr e => exact ⟨F.tgt e.2.1, by
+        intro h
+        exact hloop e.2.1 (e.2.2.trans h.symm)
+      ⟩
+  · intro e
+    cases e with
+    | inl e => exact F.fiberMap e.1
+    | inr e =>
+        exact fun x => F.fiberMap e.2.2.1
+          (e.2.2.2.symm ▸ (e.2.1.2 ▸ F.fiberMap e.2.1.1 x))
+
 end FiniteFiberSystem
 
 end Positivity
