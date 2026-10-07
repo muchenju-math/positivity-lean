@@ -19,7 +19,128 @@ namespace Positivity
 
 open FiniteFiberSystem
 
-variable {V E : Type*} [Fintype V] [Fintype E]
+variable {V E R : Type*} [Fintype V] [Fintype E] [CommRing R]
+
+/-- Regard a matrix over `R` as a constant polynomial matrix. -/
+def constantPolynomialMatrix {ι : Type*} (A : Matrix ι ι R) :
+    Matrix ι ι (Polynomial R) := fun i j => Polynomial.C (A i j)
+
+/-- A polynomial rank-one update supported in row `i`.  This is the update
+`A + X · (eᵢ vᵀ)` written by replacing row `i`. -/
+def rankOneRowUpdate {ι : Type*} [DecidableEq ι] (A : Matrix ι ι R)
+    (i : ι) (v : ι → R) : Matrix ι ι (Polynomial R) :=
+  (constantPolynomialMatrix A).updateRow i fun j =>
+    Polynomial.C (A i j) + Polynomial.X * Polynomial.C (v j)
+
+/-- The determinant derivative for an arbitrary row-supported rank-one
+perturbation.  Equivalently, the determinant polynomial is affine in the
+update variable, and its linear coefficient is the determinant with that row
+replaced by the perturbing vector. -/
+theorem det_rankOneRowUpdate {ι : Type*} [Fintype ι] [DecidableEq ι]
+    [Nonempty ι] (A : Matrix ι ι R) (i : ι)
+    (v : ι → R) :
+    (rankOneRowUpdate A i v).det =
+      Polynomial.C A.det + Polynomial.X * Polynomial.C ((A.updateRow i v).det) := by
+  classical
+  let M := constantPolynomialMatrix A
+  have hMdet : M.det = Polynomial.C A.det := by
+    simpa [M, constantPolynomialMatrix] using
+      (RingHom.map_det (Polynomial.C : R →+* Polynomial R) A)
+  have hrow : M.updateRow i (M i) = M := by
+    ext k j
+    by_cases hk : k = i <;> simp [Matrix.updateRow, hk]
+  have hreplace : M.updateRow i (fun j => Polynomial.C (v j)) =
+      constantPolynomialMatrix (A.updateRow i v) := by
+    ext k j
+    by_cases hk : k = i <;> simp [Matrix.updateRow, constantPolynomialMatrix, M, hk]
+  have hreplaceDet :
+      (M.updateRow i (fun j => Polynomial.C (v j))).det =
+        Polynomial.C ((A.updateRow i v).det) := by
+    rw [hreplace]
+    simpa [constantPolynomialMatrix] using
+      (RingHom.map_det (Polynomial.C : R →+* Polynomial R) (A.updateRow i v))
+  have hupdate : rankOneRowUpdate A i v =
+      M.updateRow i (M i + Polynomial.X • fun j => Polynomial.C (v j)) := by
+    ext k j
+    by_cases hk : k = i <;> simp [rankOneRowUpdate, constantPolynomialMatrix, M,
+      Matrix.updateRow, hk, mul_comm]
+  calc
+    (rankOneRowUpdate A i v).det =
+        (M.updateRow i (M i + Polynomial.X • fun j => Polynomial.C (v j))).det := by
+          rw [hupdate]
+    _ = (M.updateRow i (M i)).det +
+          (M.updateRow i (Polynomial.X • fun j => Polynomial.C (v j))).det :=
+        Matrix.det_updateRow_add M i (M i) (Polynomial.X • fun j => Polynomial.C (v j))
+    _ = M.det + Polynomial.X *
+          (M.updateRow i (fun j => Polynomial.C (v j))).det := by
+        rw [hrow, Matrix.det_updateRow_smul]
+    _ = Polynomial.C A.det + Polynomial.X *
+          Polynomial.C ((A.updateRow i v).det) := by rw [hMdet, hreplaceDet]
+
+/-- Evaluating the formal derivative of the rank-one row update at zero
+returns the determinant with the affected row replaced by the update vector. -/
+theorem deriv_det_rankOneRowUpdate_at_zero {ι : Type*} [Fintype ι]
+    [DecidableEq ι] [Nonempty ι] (A : Matrix ι ι R) (i : ι) (v : ι → R) :
+    ((rankOneRowUpdate A i v).det.derivative).eval 0 =
+      Polynomial.C ((A.updateRow i v).det) := by
+  rw [det_rankOneRowUpdate]
+  simp
+
+/-- A polynomial rank-one update supported in column `j`. -/
+def rankOneColumnUpdate {ι : Type*} [DecidableEq ι] (A : Matrix ι ι R)
+    (j : ι) (v : ι → R) : Matrix ι ι (Polynomial R) :=
+  (constantPolynomialMatrix A).updateCol j fun i =>
+    Polynomial.C (A i j) + Polynomial.X * Polynomial.C (v i)
+
+/-- Column-supported version of the rank-one determinant derivative. -/
+theorem det_rankOneColumnUpdate {ι : Type*} [Fintype ι] [DecidableEq ι]
+    [Nonempty ι] (A : Matrix ι ι R) (j : ι) (v : ι → R) :
+    (rankOneColumnUpdate A j v).det =
+      Polynomial.C A.det + Polynomial.X * Polynomial.C ((A.updateCol j v).det) := by
+  classical
+  let M := constantPolynomialMatrix A
+  have hMdet : M.det = Polynomial.C A.det := by
+    simpa [M, constantPolynomialMatrix] using
+      (RingHom.map_det (Polynomial.C : R →+* Polynomial R) A)
+  have hcol : M.updateCol j (fun i => M i j) = M := by
+    ext i k
+    by_cases hk : k = j <;> simp [Matrix.updateCol, hk]
+  have hreplace : M.updateCol j (fun i => Polynomial.C (v i)) =
+      constantPolynomialMatrix (A.updateCol j v) := by
+    ext i k
+    by_cases hk : k = j <;> simp [Matrix.updateCol, constantPolynomialMatrix, M, hk]
+  have hreplaceDet :
+      (M.updateCol j (fun i => Polynomial.C (v i))).det =
+        Polynomial.C ((A.updateCol j v).det) := by
+    rw [hreplace]
+    simpa [constantPolynomialMatrix] using
+      (RingHom.map_det (Polynomial.C : R →+* Polynomial R) (A.updateCol j v))
+  have hupdate : rankOneColumnUpdate A j v =
+      M.updateCol j (M.col j + Polynomial.X • fun i => Polynomial.C (v i)) := by
+    ext i k
+    by_cases hk : k = j <;> simp [rankOneColumnUpdate, constantPolynomialMatrix, M,
+      Matrix.updateCol, hk, mul_comm]
+  calc
+    (rankOneColumnUpdate A j v).det =
+        (M.updateCol j (M.col j + Polynomial.X • fun i => Polynomial.C (v i))).det := by
+          rw [hupdate]
+    _ = (M.updateCol j (M.col j)).det +
+          (M.updateCol j (Polynomial.X • fun i => Polynomial.C (v i))).det :=
+        Matrix.det_updateCol_add M j (M.col j) (Polynomial.X • fun i => Polynomial.C (v i))
+    _ = M.det + Polynomial.X *
+          (M.updateCol j (fun i => Polynomial.C (v i))).det := by
+        rw [hcol, Matrix.det_updateCol_smul]
+    _ = Polynomial.C A.det + Polynomial.X *
+          Polynomial.C ((A.updateCol j v).det) := by rw [hMdet, hreplaceDet]
+
+/-- Evaluating the column-update determinant derivative at zero gives the
+determinant with that column replaced by the update vector. -/
+theorem deriv_det_rankOneColumnUpdate_at_zero {ι : Type*} [Fintype ι]
+    [DecidableEq ι] [Nonempty ι] (A : Matrix ι ι R) (j : ι) (v : ι → R) :
+    ((rankOneColumnUpdate A j v).det.derivative).eval 0 =
+      Polynomial.C ((A.updateCol j v).det) := by
+  rw [det_rankOneColumnUpdate]
+  simp
 
 /-- The contracted fiber over `v`.  At the contracted vertex, the element
 `p` is removed; fibers over all other vertices are unchanged. -/
@@ -108,3 +229,4 @@ theorem contractMovedEdge_loopMap (F : FiniteFiberSystem V E) (u : V)
   simp [contractMovedEdge, heSrc, heTgt]
 
 end Positivity
+
