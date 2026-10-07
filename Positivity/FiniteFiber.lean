@@ -110,4 +110,67 @@ def quotientDeterminant : MvPolynomial E ℤ := Matrix.det F.quotientLaplacian
 
 end FiniteFiberSystem
 
+namespace FiniteFiberSystem
+
+variable {V E : Type*} [Fintype V] [Fintype E]
+
+/-- The labelled copies of edges used to polarize an exponent vector.
+An edge `e` with exponent `α e` is replaced by `α e` distinct edges.
+When `α e = 0`, it contributes no copy. -/
+abbrev PolarizedEdge (α : E → ℕ) := Σ e : E, Fin (α e)
+
+/-- Polarize a finite-fiber system by replacing each base edge with a
+labelled number of parallel copies, retaining its fiber map on every copy.
+The fibers and reference points are unchanged. -/
+noncomputable def polarize (F : FiniteFiberSystem V E) (α : E → ℕ) :
+    FiniteFiberSystem V (PolarizedEdge α) := by
+  classical
+  exact {
+    src := fun e => F.src e.1
+    tgt := fun e => F.tgt e.1
+    Fiber := F.Fiber
+    fiberFintype := F.fiberFintype
+    reference := F.reference
+    fiberMap := fun e => F.fiberMap e.1
+  }
+
+@[simp] theorem polarize_src (F : FiniteFiberSystem V E) (α : E → ℕ)
+    (e : PolarizedEdge α) : (F.polarize α).src e = F.src e.1 := rfl
+
+@[simp] theorem polarize_tgt (F : FiniteFiberSystem V E) (α : E → ℕ)
+    (e : PolarizedEdge α) : (F.polarize α).tgt e = F.tgt e.1 := rfl
+
+@[simp] theorem polarize_fiberMap (F : FiniteFiberSystem V E) (α : E → ℕ)
+    (e : PolarizedEdge α) (p : F.Fiber (F.src e.1)) :
+    (F.polarize α).fiberMap e p = F.fiberMap e.1 p := rfl
+
+/-- The sum of the new edge variables that replaces the old variable of
+edge `e` under the polarization substitution. -/
+noncomputable def polarizedVariableSum (α : E → ℕ) (e : E) :
+    MvPolynomial (PolarizedEdge α) ℤ :=
+  ∑ t : Fin (α e), MvPolynomial.X ⟨e, t⟩
+
+/-- The polynomial substitution that sends each old edge variable to the
+sum of the variables on its labelled polarized copies. -/
+noncomputable def polarizationHom (α : E → ℕ) :
+    MvPolynomial E ℤ →+* MvPolynomial (PolarizedEdge α) ℤ :=
+  MvPolynomial.eval₂Hom
+    (MvPolynomial.C : ℤ →+* MvPolynomial (PolarizedEdge α) ℤ)
+    (polarizedVariableSum α)
+
+@[simp] theorem polarizationHom_X (α : E → ℕ) (e : E) :
+    polarizationHom α (MvPolynomial.X e) = polarizedVariableSum α e := by
+  simp [polarizationHom]
+
+/-- Substitution commutes with the determinant of the quotient matrix.  This
+is the exact matrix-level polynomial identity underlying polarization; the
+remaining coefficient extraction is a separate combinatorial statement. -/
+theorem polarizationHom_quotientDeterminant
+    (F : FiniteFiberSystem V E) (α : E → ℕ) :
+    polarizationHom α (F.quotientDeterminant) =
+      ((polarizationHom α).mapMatrix F.quotientLaplacian).det := by
+  simpa [FiniteFiberSystem.quotientDeterminant] using
+    (RingHom.map_det (polarizationHom α) F.quotientLaplacian)
+
 end Positivity
+
