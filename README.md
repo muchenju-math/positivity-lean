@@ -10,10 +10,15 @@ theorem and the coefficient recurrences are not yet fully formalized.
 
 ## Modules
 
-- `Positivity/FiniteFiber.lean`: finite-fiber systems, quotient matrices,
-  covering identity, and polarization.
-- `Positivity/LoopContraction.lean`: Section 3 loop contraction recurrence.
-- `Positivity/VertexElimination.lean`: Section 4 elimination recurrence.
+- `Positivity/FiniteFiber.lean`: finite-fiber systems, quotient matrices, and
+  the polarization substitution identity.
+- `Positivity/LoopContraction.lean`: rank-one determinant derivatives and the
+  loop-contraction construction; the coefficient recurrence remains
+  unfinished.
+- `Positivity/VertexElimination.lean`: vertex selection, the elimination
+  construction, and an abstract Schur complement identity; the coefficient
+  recurrence remains unfinished.
 - `Positivity/MainTheorem.lean`: Section 5 induction and main positivity result.
 
 Lean toolchain: `leanprover/lean4:v4.34.0`.
+
