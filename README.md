@@ -16,7 +16,8 @@ theorem and the coefficient recurrences are not yet fully formalized.
   loop-contraction construction; the coefficient recurrence remains
   unfinished.
 - `Positivity/VertexElimination.lean`: vertex selection, the elimination
-  construction, and an abstract Schur complement identity; the coefficient
+  constructions for selected injections and for all incoming/outgoing
+  compositions, and an abstract Schur complement identity; the coefficient
   recurrence remains unfinished.
 - `Positivity/MainTheorem.lean`: Section 5 induction and main positivity result.
 
