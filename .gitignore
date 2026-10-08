@@ -1,7 +1,16 @@
 .lake/
-lake-manifest.json
 *.olean
 *.ilean
+*.trace
 /.vscode/
-.playwright-mcp/
-Positivity paper.zip
+/.idea/
+/.playwright-mcp/
+/tmp/
+/backups/
+/verification/
+*.bak
+*.log
+*.zip
+*.pdf
+.DS_Store
+Thumbs.db
