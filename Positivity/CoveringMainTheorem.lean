@@ -48,7 +48,7 @@ theorem arborescenceRatio_nonnegative_integer_polynomial (F : FiniteFiberSystem 
       (IsFractionRing.injective (MvPolynomial E ℤ) (FractionRing (MvPolynomial E ℤ))).ne hbase
   rw [arborescenceRatio, ← hQ, map_mul, mul_div_cancel_left₀ _ hne]
 
-/-- The determinant formula in Proposition 2.6, with the positive sheet
+/-- The determinant formula in Proposition 2.5, with the positive sheet
 count embedded in the fraction field. -/
 theorem arborescenceRatio_eq_normalized_determinant (F : FiniteFiberSystem V E)
     (hbij : ∀ e, Function.Bijective (F.fiberMap e)) (r : V) (p : F.Fiber r)

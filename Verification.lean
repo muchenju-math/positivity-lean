@@ -7,6 +7,10 @@ Expected axioms: only `propext`, `Classical.choice`, and `Quot.sound`.
 -/
 
 #print axioms Positivity.loopDeterminantDerivative
+#print axioms Positivity.loopCharacteristicDerivative
+#print axioms Positivity.FiniteFiberSystem.fullGraphMatrix_constant_intertwine
+#print axioms Positivity.FiniteFiberSystem.laplacianCharacteristicFactorization
+#print axioms Positivity.FiniteFiberSystem.arborescence_sum_identity
 #print axioms Positivity.loopCoefficientRecurrence
 #print axioms Positivity.eliminationCoefficientRecurrence
 #print axioms Positivity.balancedCoefficient_nonnegative

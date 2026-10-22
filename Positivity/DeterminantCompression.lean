@@ -51,8 +51,8 @@ theorem det_updateRow_difference (A : Matrix ι ι R) (p q : ι) (hpq : p ≠ q)
   simp only [j.property, ite_eq_right, zero_sub, mul_neg, sub_neg_eq_add]
   by_cases hj : j.val = q <;> simp [hj]
 
-/-- The normalized row-supported case of the compression identity in
-Appendix A, over any commutative ring. -/
+/-- The normalized row-supported compression identity used in the proof
+of Lemma 3.2, over any commutative ring. -/
 theorem deriv_det_rankOneRowUpdate_compression [Nonempty ι]
     (A : Matrix ι ι R) (p : ι) (l : ι → R) (hl : l p = 1) :
     ((rankOneRowUpdate A p l).det.derivative).eval 0 =

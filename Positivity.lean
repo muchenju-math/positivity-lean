@@ -55,3 +55,6 @@ import Positivity.CoverDeterminantCast
 import Positivity.CoverTreeIdentity
 
 import Positivity.CoveringMainTheorem
+
+import Positivity.CharacteristicLoop
+import Positivity.FiberConstantDecomposition

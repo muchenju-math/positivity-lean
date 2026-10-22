@@ -1,8 +1,10 @@
-# Coefficient positivity for arborescences of covering digraphs
+# Coefficient positivity for arborescence ratios of covering digraphs
 
 Lean 4 formalization of the main proof in Sections 2–5 of
 *Coefficient positivity for arborescence ratios of covering digraphs*,
-including the covering application in Theorem 1.1.
+including the covering application in Theorem 1.1. The correspondence below
+uses the Overleaf `main.tex` reviewed on 22 October 2026; see
+[the manuscript correspondence](MANUSCRIPT.md) for conventions and scope.
 
 The main proof is complete, including the covering
 arborescence-ratio application (Theorem 1.1). The finite-fiber positivity
@@ -15,12 +17,15 @@ The final results have no assumed recurrence or matrix-tree hypotheses.
 | Manuscript result | Lean declaration |
 | --- | --- |
 | Theorem 2.3: all finite-fiber determinant coefficients are nonnegative | `Positivity.quotientDeterminant_coeff_nonnegative` |
-| Loop determinant derivative and Corollary 3.2 | `Positivity.loopDeterminantDerivative`, `Positivity.loopCoefficientRecurrence` |
+| Lemma 2.4: sum of arborescence polynomials for arbitrary fiber maps | `Positivity.FiniteFiberSystem.arborescence_sum_identity` |
+| Equation (2.7): characteristic-polynomial factorization | `Positivity.FiniteFiberSystem.laplacianCharacteristicFactorization` |
+| Lemma 3.2: loop derivative of `det(z I + Q_F)` | `Positivity.loopCharacteristicDerivative` |
+| Corollary 3.4: loop coefficient recurrence | `Positivity.loopCoefficientRecurrence` |
 | Proposition 4.4: elimination coefficient recurrence | `Positivity.eliminationCoefficientRecurrence` |
 | Directed matrix-tree theorem | `Positivity.directed_matrix_tree` |
-| Proposition 2.6: equality of quotient and covering determinants | `Positivity.FiniteFiberSystem.coveringLaplacian_det` |
+| Covering-coordinate determinant equality used for Proposition 2.5 | `Positivity.FiniteFiberSystem.coveringLaplacian_det` |
 | Exact integer identity `k * A_lift = A_base * P` | `Positivity.FiniteFiberSystem.covering_tree_identity` |
-| Proposition 2.6: ratio equals `P / k` | `Positivity.FiniteFiberSystem.arborescenceRatio_eq_normalized_determinant` |
+| Proposition 2.5: ratio equals `P / k` | `Positivity.FiniteFiberSystem.arborescenceRatio_eq_normalized_determinant` |
 | Theorem 1.1: ratio is a nonnegative integer polynomial | `Positivity.FiniteFiberSystem.arborescenceRatio_nonnegative_integer_polynomial` |
 
 The final theorem is in [CoveringMainTheorem.lean](Positivity/CoveringMainTheorem.lean). Given a finite
@@ -54,6 +59,12 @@ Loops, parallel edges, and one-element fibers are included.
   `ContractionCoordinates.lean`, `ContractionMatrix.lean`,
   `ReferenceContractionCoordinates.lean`, and `ReferenceContractionMatrix.lean`:
   the concrete contraction comparison, including the reference-sheet case.
+- `Positivity/CharacteristicLoop.lean`: the loop derivative with a scalar
+  parameter fixed by edge differentiation; taking the parameter to be a
+  polynomial indeterminate gives Lemma 3.2 as stated.
+- `Positivity/FiberConstantDecomposition.lean`: the invariant fiber-constant
+  submodule, the block upper triangular decomposition for arbitrary fiber
+  maps, and the characteristic-polynomial and root-sum identities.
 - `Positivity/LoopRecurrence.lean`: the proved `loopDeterminantDerivative`
   and `loopCoefficientRecurrence`, with no recurrence hypotheses.
 - `Positivity/NormalizedPullback.lean`: composition and reference-change
@@ -108,9 +119,9 @@ lake env lean Verification.lean
 `Verification.lean` prints the axiom dependencies of the principal results.
 They use only Lean's standard `propext`, `Classical.choice`, and `Quot.sound`;
 there are no `sorryAx` dependencies or additional mathematical axioms.
-The main results listed above are fully proved. The scope excludes Sections
-6–7, their extensions and conjectures, and separate formalizations of
-expository examples.
+The main results listed above are fully proved. Section 6 (the cited
+double-cover interpretation and the problem for general covers) and separate
+formalizations of expository examples are outside this library's scope.
 
 `Positivity.lean` is the library entry point. `Verification.lean` is the
 reproducible axiom audit. This repository contains only the library sources,
